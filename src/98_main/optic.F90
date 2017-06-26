@@ -86,6 +86,9 @@ program optic
  use m_xmpi
  use m_xomp
  use m_profiling_abi
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
  use m_build_info
  use m_optic_tools
  use m_wfk
@@ -136,7 +139,7 @@ program optic
  real(dp),allocatable :: symcart(:,:,:)
  real(dp) :: domega,ecut,fermie!,maxocc,entropy
  real(dp):: eff
- logical :: do_antiresonant, do_temperature
+ logical :: do_antiresonant, do_temperature, write_netcdf
  integer,allocatable :: istwfk(:), npwarr(:)
  real(dp) :: nelect
  real(dp) :: broadening,ucvol,maxomega,scissor,tolerance,tphysel
@@ -159,9 +162,11 @@ program optic
  type(hdr_type) :: hdr
  type(ebands_t) :: BSt, EPBSt
  integer :: finunt
+ integer :: ncid, ncdim_dim, ncdim_complex, ncdim_kpoints, ncdim_spin, ncdim_bands, ncvar_dipole_x, ncvar_dipole_y, ncvar_dipole_z
+
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
-                       autoparal, max_ncpus
+                       autoparal, max_ncpus, write_netcdf
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
 &        num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
@@ -485,6 +490,39 @@ program optic
    
    ABI_DEALLOCATE(eigtmp)
    ABI_DEALLOCATE(eig0tmp)
+
+#ifdef HAVE_NETCDF
+   !!!!!!!!!!!!!!!!!!!!!!
+   !write netcdf
+   !!!!!!!!!!!!!!!!!!!!!!
+   if (write_netcdf) then
+
+       NCF_CHECK( nf90_create("dipoles.nc", NF90_CLOBBER, ncid) )
+       NCF_CHECK( nf90_def_dim(ncid, "dimensions",       3,     ncdim_dim) )
+       NCF_CHECK( nf90_def_dim(ncid, "complex",          2, ncdim_complex) )
+       NCF_CHECK( nf90_def_dim(ncid, "num_kpoints",   nkpt, ncdim_kpoints) )
+       NCF_CHECK( nf90_def_dim(ncid, "num_spin",    nsppol,    ncdim_spin) )
+       NCF_CHECK( nf90_def_dim(ncid, "num_bands",    mband,   ncdim_bands) )
+       NCF_CHECK( nf90_def_var(ncid, "dipoles_x", NF90_DOUBLE, 
+       (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_x) )
+       NCF_CHECK( nf90_def_var(ncid, "dipoles_y", NF90_DOUBLE,
+       (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_y) )
+       NCF_CHECK( nf90_def_var(ncid, "dipoles_z", NF90_DOUBLE, 
+       (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_z) )
+       NCF_CHECK( nf90_enddef(ncid) )
+
+       write(*,*) "nkpt",nkpt
+       write(*,*) "nsppol",nsppol
+       write(*,*) "mband",mband
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_x, eigen11, (/2,mband,mband,nkpt,nsppol/), (/1,1,1,1,1/)), "putting dipole_x")
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_y, eigen12, (/2,mband,mband,nkpt,nsppol/), (/1,1,1,1,1/)), "putting dipole_y")
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_z, eigen13, (/2,mband,mband,nkpt,nsppol/), (/1,1,1,1,1/)), "putting dipole_z")
+       write(*,*) 'done writting netcdf file'
+       call exit(0)
+   endif
+
+   !!!!!!!!!!!!!!!!!!!!!!
+#endif
 
  end if
 
