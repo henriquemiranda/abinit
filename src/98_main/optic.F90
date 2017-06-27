@@ -508,12 +508,13 @@ program optic
        NCF_CHECK( nf90_def_var(ncid, "dipoles_z", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_z) )
        NCF_CHECK( nf90_enddef(ncid) )
 
-       write(*,*) "nkpt",nkpt
        write(*,*) "nsppol",nsppol
+       write(*,*) "nkpt",nkpt
        write(*,*) "mband",mband
-       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_x, eigen11, (/2,mband,mband,nkpt,nsppol/), (/1,1,1,1,1/)), "putting dipole_x")
-       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_y, eigen12, (/2,mband,mband,nkpt,nsppol/), (/1,1,1,1,1/)), "putting dipole_y")
-       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_z, eigen13, (/2,mband,mband,nkpt,nsppol/), (/1,1,1,1,1/)), "putting dipole_z")
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_x, eigen11, (/1,1,1,1,1/), (/2,mband,mband,nkpt,nsppol/)), "putting dipole_x")
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_y, eigen12, (/1,1,1,1,1/), (/2,mband,mband,nkpt,nsppol/)), "putting dipole_y")
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_z, eigen13, (/1,1,1,1,1/), (/2,mband,mband,nkpt,nsppol/)), "putting dipole_z")
+       NCF_CHECK(nf90_close(ncid))
        write(*,*) 'done writting netcdf file'
        call exit(0)
    endif
