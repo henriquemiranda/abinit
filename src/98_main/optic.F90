@@ -503,12 +503,9 @@ program optic
        NCF_CHECK( nf90_def_dim(ncid, "num_kpoints",   nkpt, ncdim_kpoints) )
        NCF_CHECK( nf90_def_dim(ncid, "num_spin",    nsppol,    ncdim_spin) )
        NCF_CHECK( nf90_def_dim(ncid, "num_bands",    mband,   ncdim_bands) )
-       NCF_CHECK( nf90_def_var(ncid, "dipoles_x", NF90_DOUBLE, 
-       (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_x) )
-       NCF_CHECK( nf90_def_var(ncid, "dipoles_y", NF90_DOUBLE,
-       (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_y) )
-       NCF_CHECK( nf90_def_var(ncid, "dipoles_z", NF90_DOUBLE, 
-       (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_z) )
+       NCF_CHECK( nf90_def_var(ncid, "dipoles_x", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_x) )
+       NCF_CHECK( nf90_def_var(ncid, "dipoles_y", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_y) )
+       NCF_CHECK( nf90_def_var(ncid, "dipoles_z", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_z) )
        NCF_CHECK( nf90_enddef(ncid) )
 
        write(*,*) "nkpt",nkpt
