@@ -162,7 +162,7 @@ program optic
  type(hdr_type) :: hdr
  type(ebands_t) :: BSt, EPBSt
  integer :: finunt
- integer :: ncid, ncdim_dim, ncdim_complex, ncdim_kpoints, ncdim_spin, ncdim_bands, ncvar_dipole_x, ncvar_dipole_y, ncvar_dipole_z
+ integer :: ncid, ncdim_dim, ncdim_complex, ncdim_kpoints, ncdim_spin, ncdim_bands, ncvar_eig, ncvar_dipole_x, ncvar_dipole_y, ncvar_dipole_z
 
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
@@ -503,6 +503,7 @@ program optic
        NCF_CHECK( nf90_def_dim(ncid, "num_kpoints",   nkpt, ncdim_kpoints) )
        NCF_CHECK( nf90_def_dim(ncid, "num_spin",    nsppol,    ncdim_spin) )
        NCF_CHECK( nf90_def_dim(ncid, "num_bands",    mband,   ncdim_bands) )
+       NCF_CHECK( nf90_def_var(ncid, "eigenvalues", NF90_DOUBLE, (/ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_eig) )
        NCF_CHECK( nf90_def_var(ncid, "dipoles_x", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_x) )
        NCF_CHECK( nf90_def_var(ncid, "dipoles_y", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_y) )
        NCF_CHECK( nf90_def_var(ncid, "dipoles_z", NF90_DOUBLE, (/ncdim_complex,ncdim_bands,ncdim_bands,ncdim_kpoints,ncdim_spin/), ncvar_dipole_z) )
@@ -511,6 +512,8 @@ program optic
        write(*,*) "nsppol",nsppol
        write(*,*) "nkpt",nkpt
        write(*,*) "mband",mband
+
+       NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_eig,       eigen0, (/1,1,1/), (/mband,nkpt,nsppol/)), "putting eivals")
        NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_x, eigen11, (/1,1,1,1,1/), (/2,mband,mband,nkpt,nsppol/)), "putting dipole_x")
        NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_y, eigen12, (/1,1,1,1,1/), (/2,mband,mband,nkpt,nsppol/)), "putting dipole_y")
        NCF_CHECK_MSG(nf90_put_var(ncid, ncvar_dipole_z, eigen13, (/1,1,1,1,1/), (/2,mband,mband,nkpt,nsppol/)), "putting dipole_z")
